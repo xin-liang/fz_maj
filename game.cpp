@@ -1,3 +1,4 @@
+#include "defs.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "game.h"
@@ -6,6 +7,14 @@
 #include "style_ai.h"
 #include "error.h"
 #include "memory.h"
+#include "tools.h"
+
+#include <vector>
+#include <functional>
+#include <algorithm>
+
+
+#define DEBUG_GAME
 
 using namespace std;
 using namespace FZMAJ_NS;
@@ -15,7 +24,7 @@ Game::Game(FZMAJ *maj) : Pointers(maj) {
 		ai[i] = NULL;
 
 	ai_map = new std::map<std::string,AICreator>();
-
+    memory->create(actlist,4,NUM_ACT,"game:actlist");
 
     for(int i=0;i<136;++i)
       is_aka[i]=0;
@@ -39,11 +48,232 @@ Game::~Game(){
 		delete ai[i];
 }
 
-void Game::start(long seed)
+void Game::start(long s)
 {
+  seed = s;
+  srand(seed);
   started = 1;
   fprintf(screen, "Game started with seed %d\n",seed);
 
+  // check ai settings
+  for(int i=0;i<4;++i)
+    if (!ai[i]){
+      create_ai("general",i);
+    }
+
+  // initialize the set of game
+
+  initialize_game();
+
+  fprintf(screen, "Start Kyoku test\n");
+
+  start_kyoku();
+
+}
+
+void Game::initialize_game()
+{
+  bafuu = 27; //cp
+  kyoku = 0;
+  hajioya = rand()%4;
+  oya  = hajioya;
+  honba = 0;
+  residue = 0;
+  pai_ptr = 0;
+  pos_ptr = hajioya;
+
+  river.resize(4);
+  river_stat.resize(4);
+  tehai.resize(4);
+  for(int i=0;i<4;++i)
+    score[i] = 25000;
+
+  update_juni();
+
+}
+
+void Game::update_juni()
+{
+  int top=0,sec=1,tir=2,las=3,swp;
+  if(score[sec]>score[top]){swp=sec;sec=top;top=swp;}
+  if(score[tir]>score[top]){swp=tir;tir=top;top=swp;}
+  if(score[las]>score[top]){swp=las;las=top;top=swp;}
+  if(score[tir]>score[sec]){swp=sec;sec=tir;tir=swp;}
+  if(score[las]>score[sec]){swp=las;las=sec;sec=swp;}
+  if(score[las]>score[tir]){swp=tir;tir=las;las=swp;}
+  juni[0]=top;
+  juni[1]=sec;
+  juni[2]=tir;
+  juni[3]=las;
+}
+
+void Game::start_kyoku()
+{
+
+  int i,j,k;
+  int p,c0;
+  Pai pai_tmp;
+
+  clear_game();
+
+  rand_perm(136,yama);
+
+  // zhua pai
+
+  for(i=0;i<3;++i)
+    for(j=0;j<4;++j) {
+      p = (j+oya)%4;
+      for(k=0;k<4;++k) {
+        c0 = yama[pai_ptr+k];
+        set_pai(&pai_tmp,c0);
+        tehai[p].push_back(pai_tmp);
+      }
+      pai_ptr += 4;
+    }
+
+  for(i=0;i<4;++i){
+    p = (i+oya)%4;
+    c0 = yama[pai_ptr+i];
+    set_pai(&pai_tmp,c0);
+    tehai[p].push_back(pai_tmp);
+    n_tehai[p] = 13;
+  }
+  pai_ptr += 4;
+
+
+  dead_ptr = 122;
+  ura_check = 0;
+  ryukyoku = 0;
+
+  n_dora = 1;
+  set_pai(&pai_tmp,yama[130]);
+  dora.push_back(pai_tmp);
+  set_pai(&pai_tmp,yama[131]);
+  ura.push_back(pai_tmp);
+
+  printf("dora hyoji = %s\n",dora[0].spai.c_str());
+  printf("ura hyoji = %s\n",ura[0].spai.c_str());
+
+  sort_tehai(0);
+  printf("tehai 0: ");
+
+  for (i=0;i<tehai[0].size();++i)
+    printf(" %s ",tools->p2str(tehai[0][i].idx).c_str());
+  printf("\n");
+
+}
+
+void Game::set_pai(Pai* pai, int c0)
+{
+  pai->idx = c0;
+  pai->cpai = c0>>2;
+  pai->aka = game->is_aka[c0];
+  pai->spai = tools->p2str(c0);
+}
+
+void Game::pai2c(Pai* pai, int n_pai, int c[])
+{
+  int i;
+  for(i=0;i<34;++i)
+    c[i]=0;
+  for(i=0;i<n_pai;++i)
+    c[pai->cpai]++;
+}
+
+void Game::clear_bakyou(Bakyou* b)
+{
+  b->dora.clear();
+  b->ura.clear();
+  b->ura_check = 0;
+}
+
+void Game::set_bakyou(Bakyou* b, int pos)
+{
+  int i,j,p;
+  for(j=0;j<4;++j){
+    p = (j-pos+4)%4;
+
+    b->score[j] = score[p];
+    b->juni[j] = juni[p];
+    b->jun[j] = jun[p];
+    b->reach_jun[j] = reach_jun[p];
+
+    b->river[j] = river[p];
+    b->river_stat[j] = river[p];
+
+    b->naki[j] = naki[p];
+    b->n_naki[j] = n_naki[p];
+  }
+  b->bafuu = bafuu;
+  b->jifuu = 27 + (4+pos-oya)%4;
+  b->kyoku = kyoku;
+  b->oya = oya;
+  b->honba = honba;
+  b->residue = residue;
+
+  b->n_dora = n_dora;
+  b->pai_ptr = pai_ptr;
+  b->dead_ptr = dead_ptr;
+  b->furiten = furiten[pos];
+  b->n_kan_tot = n_kan_tot;
+
+  b->tehai = tehai[pos];
+  b->n_tehai = n_tehai[pos];
+  b->c34 = c34[pos];
+
+}
+
+void Game::clear_game()
+{
+  int i,j;
+  dora.clear();
+  ura.clear();
+  pai_ptr = 0;
+  n_kan_tot = 0;
+  for(i=0;i<4;++i){
+    tehai[i].clear();
+    river[i].clear();
+    river_stat[i].clear();
+    jun[i]=0;
+    reach_jun[i]=0;
+    furiten[i]=0;
+    nagaman[i]=0;
+    n_naki[i]=0;
+    for(j=0;j<4;++j)
+      clear_naki(&naki[i][j]);
+  }
+
+}
+
+void Game::clear_naki(Naki *nk){
+  nk->naki_type = 0;
+  nk->n_pai = 0;
+  nk->idx_naki_pai = -1;
+  nk->naki_from = 0;
+}
+
+void Game::rand_perm(int n, int perm[])
+{
+  int i,j,t;
+  for(i=0;i<n;++i)
+    perm[i]=i;
+  for(i=0;i<n;++i){
+    j = rand()%(n-i)+i;
+    t = perm[j];
+    perm[j] = perm[i];
+    perm[i] = t;
+  }
+}
+
+void Game::gameloop()
+{
+}
+
+bool sort_by_p(const Pai& p1, const Pai& p2){return p1.idx < p2.idx;}
+
+void Game::sort_tehai(int pos)
+{
+  sort(tehai[pos].begin(),tehai[pos].end(),sort_by_p);
 }
 
 void Game::create_ai(const char *style, int pos)

@@ -17,6 +17,14 @@ public:
     AI(class FZMAJ *);
     virtual ~AI();
 
+    virtual void compute() = 0;
+
+    int act_pai1,act_pai2;
+    int act;
+
+    int *actlist;
+    void clear_act();
+
 };
 
 }

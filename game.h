@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 #include "string.h"
+#include "defs.h"
 
 //#define GAME_DEBUG
 
@@ -37,8 +38,12 @@ public:
 
 protected: // AI BU NENG ZUO BI
 
+	long seed;
 
-    // for one set game
+    int** actlist;
+    Bakyou bak[4];
+
+    // for one set game , init in initialize_game()
 
 	int bafuu;
 	int jifuu[4];
@@ -48,8 +53,9 @@ protected: // AI BU NENG ZUO BI
 	int honba;
 	int residue;
 	int score[4];
+    int juni[4];
 
-    // for one kyoku
+    // for one kyoku , init in start_kyoku()
 
 	int yama[136];
 
@@ -61,18 +67,27 @@ protected: // AI BU NENG ZUO BI
 	int pos_ptr;
 	int furiten[4];
 	int n_kan_tot;
-    int is_renzoku;
+
+    vector< vector<Pai> > tehai;
+    int n_tehai[4];
+
+    int c34[4][34];   // tehai 34
 
 	vector< vector<Pai> > river;
 	vector< vector<int> > river_stat;
 	vector<Pai> dora;
 	vector<Pai> ura;
 
-	int Ryukyoku;
+    Naki naki[4][4];
+    int n_naki[4];
+
+    int ura_check;
+
+	int ryukyoku;
 	int nagaman[4];
 	string agarilist[4];
 
-    // for one junmoku
+    // for one junmoku, update in gameloop()
 
 	int tsumo_hai;
 	int sutehai;
@@ -80,10 +95,24 @@ protected: // AI BU NENG ZUO BI
 	int cur_pos;
 	int dacya;
 
-	int agari_flag;
-	int naki_flag;
+    // inside functions
 
-	long seed;
+    void initialize_game();
+    void clear_game();
+    void clear_bakyou(Bakyou*);
+    void set_bakyou(Bakyou*, int);
+    void start_kyoku();
+    void rand_perm(int, int[]);
+    void pai2c(Pai*,int,int[]);
+
+    void clear_naki(Naki*);
+    void set_pai(Pai*, int); // from 136 to pai
+
+    void update_juni();   // [0]=top,[1]=sec,[2]=tir,[3]=las
+
+    void gameloop();
+
+    void sort_tehai(int);
 
 	template <typename T> static AI *ai_creator(FZMAJ *);
 
