@@ -4,6 +4,7 @@
 #include "input.h"
 #include "game.h"
 #include "tools.h"
+#include "paili.h"
 
 #include "string.h"
 #include "ctype.h"
@@ -79,6 +80,7 @@ FZMAJ::FZMAJ(int narg, char **arg)
 	input = new Input(this,narg,arg);
     game = new Game(this);
     tools = new Tools(this);
+    paili = new Paili(this);
 }
 
 FZMAJ::~FZMAJ()

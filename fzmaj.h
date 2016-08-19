@@ -13,6 +13,7 @@ public:
 	class Input *input;
     class Game *game;
     class Tools *tools;
+    class Paili *paili;
 
 	FILE *infile;
 	FILE *logfile;

@@ -22,6 +22,7 @@ public:
 		input(ptr->input),
         game(ptr->game),
         tools(ptr->tools),
+        paili(ptr->paili),
 		infile(ptr->infile),
 		screen(ptr->screen),
 		logfile(ptr->logfile) {}
@@ -35,6 +36,7 @@ protected:
 	Input *&input;
     Game *&game;
     Tools *&tools;
+    Paili *&paili;
 
 	FILE *&infile;
 	FILE *&logfile;

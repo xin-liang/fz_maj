@@ -73,12 +73,32 @@ struct Bakyou {
   vector<Pai> dora;
   vector<Pai> ura;
 
-  Naki naki[4][4];
+  vector< vector<Naki> > naki;
   int n_naki[4];
 
   int ura_check;
 
-  Pai tsumo_pai;
+  Pai cur_pai;
+  int cur_pos;
+
+};
+
+struct Pattern {
+
+  int c[34];
+  int score;
+  int score_oya;
+  int score_ko;
+
+  int fan, fan_nodora;
+  int fu,fu_tmp;
+  int yaku[46];
+
+  int is_chiitoi;
+  int is_kokushi;
+
+  int is_yakuman;
+  int yakuman_baisu;
 
 };
 

@@ -10,10 +10,15 @@ class Paili : protected Pointers {
 
 public:
 
-  Paili(class FZJAM *);
+  Paili(class FZMAJ *);
   ~Paili();
 
   Bakyou *bak;
+
+
+
+
+
 
 };
 

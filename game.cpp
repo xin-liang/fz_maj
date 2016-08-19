@@ -84,6 +84,7 @@ void Game::initialize_game()
 
   river.resize(4);
   river_stat.resize(4);
+  naki.resize(4);
   tehai.resize(4);
   for(int i=0;i<4;++i)
     score[i] = 25000;
@@ -183,6 +184,8 @@ void Game::pai2c(Pai* pai, int n_pai, int c[])
 void Game::clear_bakyou(Bakyou* b)
 {
   b->dora.clear();
+  b->river.resize(4);
+  b->river_stat.resize(4);
   b->ura.clear();
   b->ura_check = 0;
 }
@@ -199,7 +202,7 @@ void Game::set_bakyou(Bakyou* b, int pos)
     b->reach_jun[j] = reach_jun[p];
 
     b->river[j] = river[p];
-    b->river_stat[j] = river[p];
+    b->river_stat[j] = river_stat[p];
 
     b->naki[j] = naki[p];
     b->n_naki[j] = n_naki[p];
@@ -219,7 +222,11 @@ void Game::set_bakyou(Bakyou* b, int pos)
 
   b->tehai = tehai[pos];
   b->n_tehai = n_tehai[pos];
-  b->c34 = c34[pos];
+  for(i=0;i<34;++i)
+    b->c34[i] = c34[pos][i];
+
+  b->cur_pai = cur_pai;
+  b->cur_pos = cur_pos;
 
 }
 
@@ -233,14 +240,13 @@ void Game::clear_game()
   for(i=0;i<4;++i){
     tehai[i].clear();
     river[i].clear();
+    naki[i].clear();
     river_stat[i].clear();
     jun[i]=0;
     reach_jun[i]=0;
     furiten[i]=0;
     nagaman[i]=0;
     n_naki[i]=0;
-    for(j=0;j<4;++j)
-      clear_naki(&naki[i][j]);
   }
 
 }

@@ -78,7 +78,7 @@ protected: // AI BU NENG ZUO BI
 	vector<Pai> dora;
 	vector<Pai> ura;
 
-    Naki naki[4][4];
+    vector< vector<Naki> > naki;
     int n_naki[4];
 
     int ura_check;
@@ -89,11 +89,9 @@ protected: // AI BU NENG ZUO BI
 
     // for one junmoku, update in gameloop()
 
-	int tsumo_hai;
-	int sutehai;
+    Pai cur_pai;
 	int cur_act;   //  tsumo, kiru, kakan
 	int cur_pos;
-	int dacya;
 
     // inside functions
 
