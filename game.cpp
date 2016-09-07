@@ -8,13 +8,14 @@
 #include "error.h"
 #include "memory.h"
 #include "tools.h"
+#include "paili.h"
 
 #include <vector>
 #include <functional>
 #include <algorithm>
 
 
-#define DEBUG_GAME
+#define DEBUG_GAME 1
 
 using namespace std;
 using namespace FZMAJ_NS;
@@ -152,16 +153,36 @@ void Game::start_kyoku()
   set_pai(&pai_tmp,yama[131]);
   ura.push_back(pai_tmp);
 
+  cur_pos = oya;
+  set_pai(&cur_pai,yama[pai_ptr]);
+
+  //test
+
   printf("dora hyoji = %s\n",dora[0].spai.c_str());
   printf("ura hyoji = %s\n",ura[0].spai.c_str());
 
   sort_tehai(0);
-  printf("tehai 0: ");
+  tehai[0].push_back(cur_pai);
 
-  for (i=0;i<tehai[0].size();++i)
-    printf(" %s ",tools->p2str(tehai[0][i].idx).c_str());
+  debug_print_tehai(0);
+
+
+  set_bakyou(0);
+
+  paili->set_bakyou(&bak);
+  paili->test();
+
+
+}
+
+void Game::debug_print_tehai(int pos)
+{
+#ifdef DEBUG_GAME
+  printf("tehai %d: ",pos);
+  for (int i=0;i<tehai[pos].size();++i)
+    printf(" %s ",tools->p2str(tehai[pos][i].idx).c_str());
   printf("\n");
-
+#endif
 }
 
 void Game::set_pai(Pai* pai, int c0)
@@ -186,12 +207,14 @@ void Game::clear_bakyou(Bakyou* b)
   b->dora.clear();
   b->river.resize(4);
   b->river_stat.resize(4);
+  b->naki.resize(4);
   b->ura.clear();
-  b->ura_check = 0;
 }
 
-void Game::set_bakyou(Bakyou* b, int pos)
+void Game::set_bakyou(int pos)
 {
+  Bakyou *b = &bak;
+  clear_bakyou(b);
   int i,j,p;
   for(j=0;j<4;++j){
     p = (j-pos+4)%4;
@@ -215,6 +238,10 @@ void Game::set_bakyou(Bakyou* b, int pos)
   b->residue = residue;
 
   b->n_dora = n_dora;
+  b->dora = dora;
+  b->ura_check = ura_check;
+  if (ura_check)
+    b->ura = ura;
   b->pai_ptr = pai_ptr;
   b->dead_ptr = dead_ptr;
   b->furiten = furiten[pos];
@@ -227,7 +254,6 @@ void Game::set_bakyou(Bakyou* b, int pos)
 
   b->cur_pai = cur_pai;
   b->cur_pos = cur_pos;
-
 }
 
 void Game::clear_game()
@@ -243,7 +269,7 @@ void Game::clear_game()
     naki[i].clear();
     river_stat[i].clear();
     jun[i]=0;
-    reach_jun[i]=0;
+    reach_jun[i]=-1;
     furiten[i]=0;
     nagaman[i]=0;
     n_naki[i]=0;

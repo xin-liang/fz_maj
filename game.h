@@ -36,12 +36,14 @@ public:
 
     int is_aka[136];
 
+    void clear_bakyou(Bakyou*);
+
 protected: // AI BU NENG ZUO BI
 
 	long seed;
 
     int** actlist;
-    Bakyou bak[4];
+    Bakyou bak;
 
     // for one set game , init in initialize_game()
 
@@ -97,8 +99,7 @@ protected: // AI BU NENG ZUO BI
 
     void initialize_game();
     void clear_game();
-    void clear_bakyou(Bakyou*);
-    void set_bakyou(Bakyou*, int);
+    void set_bakyou(int);
     void start_kyoku();
     void rand_perm(int, int[]);
     void pai2c(Pai*,int,int[]);
@@ -111,6 +112,8 @@ protected: // AI BU NENG ZUO BI
     void gameloop();
 
     void sort_tehai(int);
+
+    void debug_print_tehai(int);
 
 	template <typename T> static AI *ai_creator(FZMAJ *);
 
